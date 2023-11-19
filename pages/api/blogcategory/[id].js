@@ -4,6 +4,7 @@ import conn from "../dbconfig/conn";
 import path from "path";
 import { IncomingForm } from "formidable";
 import fs from "fs";
+const { unlink } = require("fs").promises;
 
 export const config = {
   api: {
@@ -33,11 +34,39 @@ export default async function handler(req, res) {
   if (req.method == "DELETE") {
     try {
       const { id } = req.query;
-      console.log(id);
-      // Query the database
+
+      // get category data
+      const [category] = await conn.query(
+        "SELECT category_image, category_icon FROM blog_category WHERE blog_cate_id = ?",
+        [id]
+      );
+
+      // Query for delete category
       const q = "DELETE FROM blog_category WHERE blog_cate_id = ?";
 
       const [rows] = await conn.query(q, [id]);
+
+      // check image awailable or not
+      if (category.length !== 0) {
+        const projectDirectory = path.resolve(
+          __dirname,
+          "../../../../../public/assets/upload/blog"
+        );
+
+        // Delete categoryImage
+        const categoryImage = category[0].category_image;
+        if (categoryImage) {
+          const imagePath = path.join(projectDirectory, categoryImage);
+          await unlink(imagePath);
+        }
+
+        // Delete categoryIcon
+        const categoryIcon = category[0].category_icon;
+        if (categoryIcon) {
+          const iconPath = path.join(projectDirectory, categoryIcon);
+          await unlink(iconPath);
+        }
+      }
 
       // Process the data and send the response
       res.status(200).json(rows);
@@ -63,14 +92,21 @@ export default async function handler(req, res) {
           category_image,
           category_icon,
         } = fields;
+        console.log(fields);
 
         let sql = "";
         let params = [];
 
+        // get category data
+        const [category] = await conn.query(
+          "SELECT category_image, category_icon FROM blog_category WHERE blog_cate_id = ?",
+          [id]
+        );
+
         if (!files.category_icon && !files.category_image) {
           // No new images provided, updating other fields
           sql =
-            "UPDATE `blog_category` SET `category_title`= ?, `category_description`= ?, `meta_tag`= ?, `meta_desc`= ?, `meta_keyword`= ?, `canonical_url`= ?, `category_image`= ?, `category_icon`= ?  WHERE blog_cate_id = ?";
+            "UPDATE `blog_category` SET `category_title`= ?, `category_description`= ?, `meta_tag`= ?, `meta_description`= ?, `meta_keyword`= ?, `canonical_url`= ?, `category_image`= ?, `category_icon`= ?  WHERE blog_cate_id = ?";
 
           params = [
             category_title,
@@ -85,8 +121,19 @@ export default async function handler(req, res) {
           ];
         } else {
           // Check and update each image if provided
-          const updateImages = (imageField, imageFile, index) => {
+          const updateImages = async (imageField, imageFile, index, fieldName) => {
             if (imageFile) {
+              const oldImage = category[0][fieldName];
+              if (oldImage) {
+                // Delete old image
+                const oldImagePath = path.join(
+                  __dirname,
+                  "../../../../../public/assets/upload/blog",
+                  oldImage
+                );
+                unlink(oldImagePath);
+              }
+
               const oldPath = imageFile[0].filepath;
               const nFileName = `${Date.now()}_${index}.${
                 imageFile[0].originalFilename
@@ -117,24 +164,21 @@ export default async function handler(req, res) {
           let updatedicon = category_icon;
 
           if (files.category_image) {
-            updatedimage = updateImages(
+            updatedimage = await updateImages(
               category_image,
               files.category_image,
-              1
+              1,
+              "category_image"
             );
-          } 
-          
+          }
+
           if (files.category_icon) {
-            updatedicon = updateImages(
-              category_icon,
-              files.category_icon,
-              2
-            );
+            updatedicon = await updateImages(category_icon, files.category_icon, 2, "category_icon");
           }
 
           // SQL query for updating the database with new images
           sql =
-          "UPDATE `blog_category` SET `category_title`= ?, `category_description`= ?, `meta_tag`= ?, `meta_desc`= ?, `meta_keyword`= ?, `canonical_url`= ?, `category_image`= ?, `category_icon`= ?  WHERE blog_cate_id = ?";
+            "UPDATE `blog_category` SET `category_title`= ?, `category_description`= ?, `meta_tag`= ?, `meta_description`= ?, `meta_keyword`= ?, `canonical_url`= ?, `category_image`= ?, `category_icon`= ?  WHERE blog_cate_id = ?";
 
           params = [
             category_title,

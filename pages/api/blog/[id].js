@@ -4,7 +4,6 @@ import conn from "../dbconfig/conn";
 import path from "path";
 import { IncomingForm } from "formidable";
 import fs from "fs";
-const { unlink } = require("fs").promises;
 
 export const config = {
   api: {
@@ -17,7 +16,7 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const q = "SELECT * FROM `product_master` WHERE product_id = ?";
+      const q = "SELECT * FROM `blog_master` WHERE blog_id = ?";
 
       const data = [id];
       const [rows] = await conn.query(q, data);
@@ -34,30 +33,11 @@ export default async function handler(req, res) {
   if (req.method == "DELETE") {
     try {
       const { id } = req.query;
-
-      // first get product data
-      const [product] = await conn.query(
-        "SELECT product_image FROM  product_master WHERE product_id = ?",
-        [id]
-      );
-
-      // Query for delete data
-      const q = "DELETE FROM product_master WHERE product_id = ?";
+      console.log(id);
+      // Query the database
+      const q = "DELETE FROM blog_master WHERE blog_id = ?";
 
       const [rows] = await conn.query(q, [id]);
-
-      //check image awailable or not
-      let productImage = "";
-      if (product.length != 0) {
-        productImage = product[0].product_image;
-        const projectDirectory = path.resolve(
-          __dirname,
-          "../../../../../public/assets/upload/products"
-        );
-        const newPath = path.join(projectDirectory, productImage);
-        console.log(newPath);
-        await unlink(newPath);
-      }
 
       // Process the data and send the response
       res.status(200).json(rows);
@@ -85,16 +65,8 @@ export default async function handler(req, res) {
           canonical_url,
         } = fields;
 
-        // get product data
-        const [product] = await conn.query(
-          "SELECT product_image FROM product_master WHERE product_id = ?",
-          [id]
-        );
-
         let sql = "";
         let params = [];
-        let result = "";
-
         const upadatedDate = new Date()
           .toISOString()
           .slice(0, 19)
@@ -102,7 +74,7 @@ export default async function handler(req, res) {
 
         if (!files.product_image) {
           sql =
-            "UPDATE `product_master` SET `cate_id`= ?, `product_title`= ?, `product_short_desc`= ?, `product_long_desc`= ?, `meta_tag`= ?, `meta_desc`= ?, `meta_keyword`= ?, `canonical_url`= ?, `updated_date`= ?  WHERE product_id = ?";
+            "UPDATE `blog_master` SET `blog_title`= ?, `blog_description`= ?, `meta_tag`= ?, `meta_desc`= ?, `meta_keyword`= ?, `canonical_url`= ?, `updated_date`= ?, `blog_cate_id`= ?  WHERE blog_id = ?";
 
           params = [
             cate_id,
@@ -116,7 +88,6 @@ export default async function handler(req, res) {
             upadatedDate,
             id,
           ];
-          result = await conn.query(sql, params);
 
         } else {
           // Configuration for the new image
@@ -127,7 +98,7 @@ export default async function handler(req, res) {
           const newFileName = nFileName.replace(/\s/g, "");
           const projectDirectory = path.resolve(
             __dirname,
-            "../../../../../public/assets/upload/products"
+            "../../../../../public/assets/upload/blogs"
           );
           const newPath = path.join(projectDirectory, newFileName);
 
@@ -140,7 +111,7 @@ export default async function handler(req, res) {
           });
 
           sql =
-            "UPDATE `product_master` SET `cate_id`= ?, `product_title`= ?, `product_short_desc`= ?, `product_long_desc`= ?, `meta_tag`= ?, `meta_desc`= ?, `meta_keyword`= ?, `canonical_url`= ?, `product_image`= ?, `updated_date`= ?  WHERE product_id = ?";
+          "UPDATE `blog_master` SET `blog_title`= ?, `blog_thumbnail`= ?, `blog_description`= ?, `meta_tag`= ?, `meta_desc`= ?, `meta_keyword`= ?, `canonical_url`= ?, `updated_date`= ?, `blog_cate_id`= ?  WHERE blog_id = ?";
 
           params = [
             cate_id,
@@ -155,15 +126,9 @@ export default async function handler(req, res) {
             upadatedDate,
             id,
           ];
-          result = await conn.query(sql, params);
-          // Delete the old image
-          if (product.length !== 0) {
-            const oldImage = product[0].product_image;
-            const oldImagePath = path.join(projectDirectory, oldImage);
-            await unlink(oldImagePath);
-          }
         }
 
+        const result = await conn.query(sql, params);
         res.status(200).json(result);
       });
     } catch (err) {

@@ -13,24 +13,40 @@ export default async function handler(req, res) {
   if (req.method == "POST") {
     const form = new IncomingForm();
     form.parse(req, (err, fields, files) => {
+      const {
+        cate_id,
+        product_title,
+        product_short_desc,
+        product_long_desc,
+        meta_tag,
+        meta_desc,
+        meta_keyword,
+        canonical_url,
+      } = fields;
+
       // check file exist or not
-      if (!files.category_image) {
+      if (!files.product_image) {
         return res.status(400).json({ message: "Please Upload Files." });
+      }
+
+      // check Category exist or not
+      if (!cate_id || cate_id == 0) {
+        return res.status(400).json({ message: "Please Select Category." });
       }
 
       // configuration of path and name
       // old path where file availbale
-      const oldPath = files.category_image[0].filepath; // Access the path of the uploaded image
+      const oldPath = files.product_image[0].filepath; // Access the path of the uploaded image
       // new path
       const nFileName = `${Date.now()}.${
-        files.category_image[0].originalFilename
+        files.product_image[0].originalFilename
       }`;
       // remove space
       const newFileName = nFileName.replace(/\s/g, "");
       // project dir
       const projectDirectory = path.resolve(
         __dirname,
-        "../../../../../public/assets/upload/product-category"
+        "../../../../../public/assets/upload/blogs"
       );
       // combine path and image name
       const newPath = path.join(projectDirectory, newFileName);
@@ -41,38 +57,28 @@ export default async function handler(req, res) {
           console.log(moveErr);
           res.status(500).json({ message: "File Upload failed." });
         } else {
-
           try {
             console.log(fields);
             // db operation
-            const {
-              category_name,
-              category_title,
-              category_description,
-              sub_category,
-              meta_tag,
-              meta_keyword,
-              meta_description,
-              canonical_url,
-            } = fields;
-  
-            const [row] = await conn.query("INSERT INTO product_category SET ? ", {
-              category_name: category_name,
-              category_title: category_title,
-              category_description: category_description,
-              category_image: newFileName,
-              sub_category: sub_category,
-              meta_tag: meta_tag,
-              meta_keyword: meta_keyword,
-              meta_description: meta_description,
-              canonical_url: canonical_url,
-              status: 1,
-            });
+            const [row] = await conn.query(
+              "INSERT INTO blog_master SET ? ",
+              {
+                cate_id: cate_id,
+                product_title: product_title,
+                product_short_desc: product_short_desc,
+                product_long_desc: product_long_desc,
+                meta_tag: meta_tag,
+                meta_desc: meta_desc,
+                meta_keyword: meta_keyword,
+                canonical_url: canonical_url,
+                product_image: newFileName,
+                status: 1,
+              }
+            );
             res.status(200).json(row);
-            
           } catch (err) {
             console.log(err);
-            res.status(500).json({message:"Failed to Add Product Category"})
+            res.status(500).json({ message: "Failed to Add Product Category" });
           }
         }
       });
@@ -83,7 +89,7 @@ export default async function handler(req, res) {
     try {
       // Query the database
 
-      const q = "SELECT * FROM `product_category`";
+      const q = "SELECT * FROM `blog_master`";
       console.log(q);
       const [rows] = await conn.query(q);
       console.log(rows);

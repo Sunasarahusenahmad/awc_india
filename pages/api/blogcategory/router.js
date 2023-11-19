@@ -62,7 +62,7 @@ export default async function handler(req, res) {
                 } = fields;
 
                 const sql =
-                  "INSERT INTO `blog_category`(`category_title`, `category_description`, `meta_tag`, `meta_desc`, `meta_keyword`, `canonical_url`, `category_image`, `category_icon`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                  "INSERT INTO `blog_category`(`category_title`, `category_description`, `meta_tag`, `meta_description`, `meta_keyword`, `canonical_url`, `category_image`, `category_icon`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 const values = [
                   category_title,
                   category_description,

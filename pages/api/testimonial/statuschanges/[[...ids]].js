@@ -1,0 +1,28 @@
+import conn from "../../dbconfig/conn";
+
+export default async function handler(req, res) {
+  if (req.method == "PATCH") {
+    try {
+      // Query the database
+      const { ids } = req.query; // This will contain the array of IDs
+      console.log(ids);
+
+      // Destructure the IDs from the array
+      const [id, status] = ids;
+
+      if (status == 1) {
+        const sql = "UPDATE testimonial SET status=0 WHERE id = ?";
+        const [rows] = await conn.query(sql, [id]);
+
+        res.status(200).json(rows);
+      } else {
+        const sql = "UPDATE testimonial SET status=1 WHERE id = ?";
+        const [rows] = await conn.query(sql, [id]);
+
+        res.status(200).json(rows);
+      }
+    } catch (err) {
+      res.status(401).json({ message: "Connection Error" });
+    }
+  }
+}

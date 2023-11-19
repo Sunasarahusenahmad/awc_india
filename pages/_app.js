@@ -1,8 +1,9 @@
 import "@/styles/globals.css";
 import "@/styles/Dashboard.css";
 import "@/styles/User.css";
+import "@/styles/StarRating.css";
 import Head from "next/head";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App({ Component, pageProps }) {
   return (

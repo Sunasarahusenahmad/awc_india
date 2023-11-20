@@ -9,6 +9,7 @@ const AddTestimonial = () => {
   const starArray = [1, 2, 3, 4, 5];
   const [loading, setLoading] = useState(false);
 
+  // handle state for add data
   const [addTestimonialData, setAddTestimonialData] = useState({
     testimonial_title: "",
     testimonial_desc: "",
@@ -17,7 +18,7 @@ const AddTestimonial = () => {
     testimonial_rating: 0,
   });
 
-  // handled the testimonial values
+  // handled the testimonial input values
   const handleChangeTestimonial = async (event) => {
     const { name, value } = event.target;
     setAddTestimonialData((prevData) => ({
@@ -26,7 +27,7 @@ const AddTestimonial = () => {
     }));
   };
 
-  //editor
+  // editor start
   const editorRef = useRef(null);
   const handleEditorChange = (content, editor) => {
     setAddTestimonialData((prevData) => ({
@@ -34,24 +35,41 @@ const AddTestimonial = () => {
       testimonial_desc: content,
     }));
   };
-  //end
+  // editor end
 
-  // file handle
+  // file handle start
+  const [selectedImage, setSelectedImage] = useState(null);
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
+
+    // Check if the file has a valid extension
+    const validExtensions = ["jpg", "jpeg", "png"];
+    const fileExtension = file.name.split(".").pop().toLowerCase();
+
+    if (!validExtensions.includes(fileExtension)) {
+      // Reset the input value to clear the invalid file
+      event.target.value = "";
+      return;
+    }
+
     setAddTestimonialData((prevImage) => ({
       ...prevImage,
       [event.target.name]: file,
     }));
-  };
 
-  // rating
+    setSelectedImage(file);
+  };
+  // file handle end
+
+  // rating start
   const handleStarClick = (selectedRating) => {
     setAddTestimonialData((prevData) => ({
       ...prevData,
       testimonial_rating: selectedRating,
     }));
   };
+  // rating end
 
   // add data into testimonial database table
   const addData = async (e) => {
@@ -78,8 +96,6 @@ const AddTestimonial = () => {
         "testimonial_rating",
         addTestimonialData.testimonial_rating
       );
-
-      console.log(formData);
 
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/testimonial/router`,
@@ -116,6 +132,7 @@ const AddTestimonial = () => {
 
         <div className="add_data_form">
           <form method="post" onSubmit={addData}>
+            {/* Title */}
             <div className="mb-3">
               <label htmlFor="product_title" className="modal_label">
                 <span style={{ color: "red" }}>*</span> Testimonial Title:-
@@ -130,6 +147,8 @@ const AddTestimonial = () => {
                 required
               />
             </div>
+
+            {/* Description */}
             <div className="mb-3">
               <span style={{ color: "red" }}>*</span>{" "}
               <p className="modal_label">Testimonial Description:-</p>
@@ -169,13 +188,24 @@ const AddTestimonial = () => {
                 required
               />
             </div>
+
+            {/* Image */}
             <div className="mb-3">
               <label htmlFor="testimonial_image" className="modal_label">
                 Testimonial Image:-{" "}
                 <span style={{ color: "red" }}>
-                  (* Only jpg and png file supported)
+                  (* Only jpg, png and jpeg file supported)
                 </span>
               </label>
+              {/* Display the selected image immediately */}
+              {selectedImage && (
+                <img
+                  src={URL.createObjectURL(selectedImage)}
+                  width="100px"
+                  height="100px"
+                  alt="profile"
+                />
+              )}
               <input
                 type="file"
                 id="testimonial_image"
@@ -184,6 +214,8 @@ const AddTestimonial = () => {
                 onChange={handleFileChange}
               />
             </div>
+
+            {/* Video */}
             <div className="mb-3">
               <label htmlFor="testimonial_video" className="modal_label">
                 Testimonial Video:-
@@ -197,6 +229,8 @@ const AddTestimonial = () => {
                 onChange={handleChangeTestimonial}
               />
             </div>
+
+            {/* Rating */}
             <div className="mb-3">
               <label htmlFor="testimonial_rating" className="modal_label">
                 Testimonial Rating:-
@@ -222,6 +256,8 @@ const AddTestimonial = () => {
                 <p>{addTestimonialData.testimonial_rating} stars</p>
               </div>
             </div>
+
+            {/* Handle Button Save and Cancle */}
             <div className="mb-3">
               <button type="submit" className="success_btn">
                 SAVE

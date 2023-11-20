@@ -9,11 +9,13 @@ import DeleteModal from "@/layouts/DeleteModal";
 import YouTube from "react-youtube";
 
 const Testimonials = () => {
-  //filter Start
+  //filter code Start
   const [filterValue, setFilterValue] = useState(""); // State to hold the filter value
+
   const handleFilterChange = (value) => {
     setFilterValue(value); // Update the filter value
   };
+
   useEffect(() => {
     setFilterdTestimonial(
       getAllTestimonial.filter((e) => {
@@ -22,7 +24,7 @@ const Testimonials = () => {
       })
     );
   }, [filterValue]);
-  // filter End
+  // filter code End
 
   // set states start
   const router = useRouter();
@@ -31,7 +33,7 @@ const Testimonials = () => {
   const [loading, setLoading] = useState(true);
   // set states end
 
-  //get all testimonial data
+  //get or fetch all testimonial data start
   const getAllTestimonialData = async () => {
     await axios
       .get(`${process.env.NEXT_PUBLIC_API_URL}/testimonial/router`)
@@ -50,9 +52,11 @@ const Testimonials = () => {
   useEffect(() => {
     getAllTestimonialData();
   }, []);
+  //get or fetch all testimonial data end
 
-  // show the star rating
+  // star rating array start
   const starArray = Array.from({ length: 5 }, (_, index) => index + 1);
+  // star rating array end
 
   // status code start
   const testimonialStatusChange = async (testimonialId, no) => {
@@ -70,24 +74,30 @@ const Testimonials = () => {
   };
   // status code end
 
-  // edit testimonial start
+  // move edit testimonial page code start
   const handleEditTestimonial = (testimonialId) => {
     setLoading(true);
     router.push(`/admin/testimonial/edit-testimonial?id=${testimonialId}`);
   };
-  // edit testimonial end
+  // move edit testimonial page code end
 
   // handle delete testimonial start
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  // open the modal
   const openDeleteModal = (deleteTestimonialId) => {
     setDeleteId(deleteTestimonialId);
     setIsDeleteModalOpen(true);
   };
+
+  // close the modal
   const closeDeleteModal = () => {
     setDeleteId(null);
     setIsDeleteModalOpen(false);
   };
+
+  // delete the record
   const deleteTestimonial = () => {
     if (deleteId) {
       deleteTestimonialData(deleteId);
@@ -95,6 +105,7 @@ const Testimonials = () => {
     }
   };
 
+  // delete code generate
   const deleteTestimonialData = async (deleteTestimonialId) => {
     setLoading(true);
     console.log(deleteTestimonialId);
@@ -170,8 +181,13 @@ const Testimonials = () => {
               {filterdTestimonial.length > 0 ? (
                 filterdTestimonial.map((testimonial, index) => (
                   <tr key={testimonial.id} style={{ textAlign: "center" }}>
+                    {/* ID */}
                     <td>{index + 1}</td>
+
+                    {/* Title */}
                     <td>{testimonial.testimonial_title}</td>
+
+                    {/* Description */}
                     <td>
                       <p
                         style={{
@@ -183,6 +199,8 @@ const Testimonials = () => {
                         }}
                       ></p>
                     </td>
+
+                    {/* Image */}
                     <td>
                       <img
                         src={`/assets/upload/testimonial/${testimonial.testimonial_image}`}
@@ -195,6 +213,8 @@ const Testimonials = () => {
                         }}
                       />
                     </td>
+
+                    {/* YouTube Video */}
                     <td>
                       {testimonial.testimonial_video && (
                         <YouTube
@@ -212,28 +232,29 @@ const Testimonials = () => {
                       )}
                     </td>
 
+                    {/* Star Rating */}
                     <td>
-                      {testimonial.rating && (
-                        <div className="star-rating">
-                          {starArray.map((star) => (
-                            <span
-                              key={star}
-                              style={{
-                                cursor: "pointer",
-                                fontSize: "24px",
-                                color:
-                                  star <= testimonial.rating
-                                    ? "#f8d64e"
-                                    : "#ddd",
-                                marginRight: "5px",
-                              }}
-                            >
-                              &#9733;
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      <div className="star-rating">
+                        {starArray.map((star) => (
+                          <span
+                            key={star}
+                            style={{
+                              cursor: "pointer",
+                              fontSize: "24px",
+                              color:
+                                star <= (testimonial.rating || 0)
+                                  ? "#f8d64e"
+                                  : "#ddd",
+                              marginRight: "5px",
+                            }}
+                          >
+                            &#9733;
+                          </span>
+                        ))}
+                      </div>
                     </td>
+
+                    {/* Handle Operation that you want to perform */}
                     <td>
                       <span>
                         <button
@@ -252,6 +273,8 @@ const Testimonials = () => {
                         </button>
                       </span>
                     </td>
+
+                    {/* Status  */}
                     <td>
                       {testimonial.status === 1 ? (
                         <img
@@ -276,6 +299,7 @@ const Testimonials = () => {
                   </tr>
                 ))
               ) : (
+                // If data is not available in database so show this message
                 <tr>
                   <td colSpan="5" align="center">
                     data is not available
@@ -285,12 +309,13 @@ const Testimonials = () => {
             </tbody>
           </table>
         </div>
-        {/* delete modal */}
+        {/* delete modal component */}
         <DeleteModal
           isOpen={isDeleteModalOpen}
           onClose={closeDeleteModal}
           onDelete={deleteTestimonial}
         />
+        {/* Show the Toast notification */}
         <Toast />
       </section>
     </>

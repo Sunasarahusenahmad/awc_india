@@ -10,38 +10,42 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+  // Handling POST request for adding a testimonial
   if (req.method == "POST") {
     try {
       const form = new IncomingForm();
       form.parse(req, (err, fields, files) => {
-        // check file exist or not
+        // check if the image file exists
         if (!files.testimonial_image) {
           return res.status(400).json({ message: "Please Upload Files." });
         }
 
-        // configuration of path and name
-        const oldPathimage = files.testimonial_image[0].filepath; // Access the path of the uploaded image
+        // configuration of path and name for the image
+        const oldPathImage = files.testimonial_image[0].filepath; // Access the path of the uploaded image
 
-        // new path
-        const nFileNameimage = `${Date.now()}.${
+        // new path and name for the image
+        const nFileNameImage = `${Date.now()}.${
           files.testimonial_image[0].originalFilename
         }`;
 
-        // remove space
-        const newFileNameimage = nFileNameimage.replace(/\s/g, "");
+        // remove spaces from the image name
+        const newFileNameImage = nFileNameImage.replace(/\s/g, "");
 
-        // project dir
+        // project directory for storing images
         const projectDirectory = path.resolve(
           __dirname,
           "../../../../../public/assets/upload/testimonial"
         );
-        // combine path and image name
-        const newPathimage = path.join(projectDirectory, newFileNameimage);
 
-        fs.copyFile(oldPathimage, newPathimage, async (moveErr1) => {
+        // combine path and image name
+        const newPathImage = path.join(projectDirectory, newFileNameImage);
+
+        // Copy the uploaded image to the new path
+        fs.copyFile(oldPathImage, newPathImage, async (moveErr1) => {
           if (moveErr1) {
             res.status(500).json({ message: "File Upload failed." });
           } else {
+            // Extracting fields from the request
             const {
               testimonial_title,
               testimonial_desc,
@@ -50,17 +54,19 @@ export default async function handler(req, res) {
               testimonial_rating,
             } = fields;
 
-            const sql =
+            // SQL query for inserting data into the testimonial table
+            const insertQuery =
               "INSERT INTO `testimonial`(`testimonial_title`, `testimonial_desc`, `testimonial_image`, `testimonial_video`, `rating`) VALUES (?, ?, ?, ?, ?)";
             const values = [
               testimonial_title,
               testimonial_desc,
-              newFileNameimage,
+              newFileNameImage,
               testimonial_video,
               testimonial_rating,
-              1,
             ];
-            const [result] = await conn.query(sql, values);
+
+            // Execute the query
+            const [result] = await conn.query(insertQuery, values);
             res.status(200).json(result);
           }
         });
@@ -72,13 +78,14 @@ export default async function handler(req, res) {
     }
   }
 
+  // Handling GET request for fetching testimonials
   if (req.method == "GET") {
     try {
-      // Query the database
+      // Query the database to fetch all testimonials
+      const fetchQuery = "SELECT * FROM `testimonial`";
 
-      const q = "SELECT * FROM `testimonial`";
-
-      const [rows] = await conn.query(q);
+      // Execute the query
+      const [rows] = await conn.query(fetchQuery);
 
       // Process the data and send the response
       res.status(200).json(rows);

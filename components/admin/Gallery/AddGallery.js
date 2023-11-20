@@ -4,14 +4,11 @@ import Link from "next/link";
 import { Editor } from "@tinymce/tinymce-react";
 import { ErrorToast } from "@/layouts/toast/Toast";
 import axios from "axios";
-import { useRouter } from "next/router";
 
-const EditTestimonial = () => {
-  // loading
+const AddGallery = () => {
   const [loading, setLoading] = useState(false);
 
-  // set the edit testimonial data state
-  const [editTestimonialData, setEditTestimonialData] = useState({
+  const [addTestimonialData, setAddTestimonialData] = useState({
     testimonial_title: "",
     testimonial_desc: "",
     testimonial_image: null,
@@ -19,122 +16,62 @@ const EditTestimonial = () => {
     testimonial_rating: 0,
   });
 
-  // get per testimonial data start
-  const router = useRouter();
-
-  let testimonialId = router.query.id;
-
-  const getPerTestimonialData = async (id) => {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/testimonial/${id}`;
-      const response = await axios.get(url);
-      const fetchedData = response.data[0];
-      setEditTestimonialData({
-        ...fetchedData,
-        testimonial_rating: parseInt(fetchedData.rating), // it's a number
-      });
-      setLoading(false);
-    } catch (err) {
-      ErrorToast(err?.response?.data?.message);
-      setLoading(false);
-    }
-  };
-
-  // fetch testimonial data into database
-  useEffect(() => {
-    getPerTestimonialData(testimonialId);
-  }, [testimonialId]);
-  // get per testimonial data end
-
-  // handled the testimonial input values start
+  // handled the testimonial values
   const handleChangeTestimonial = async (event) => {
     const { name, value } = event.target;
-    setEditTestimonialData((prevData) => ({
+    setAddTestimonialData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
-  // handled the testimonial input values end
 
-  // editor start
-  const editorRef = useRef(null);
-  const handleEditorChange = (content, editor) => {
-    setEditTestimonialData((prevData) => ({
-      ...prevData,
-      testimonial_desc: content,
-    }));
-  };
-  // editor end
-
-  // file handle start
-  const [selectedImage, setSelectedImage] = useState(null);
-
+  // file handle
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
-
-    // Check if the file has a valid extension
-    const validExtensions = ["jpg", "jpeg", "png"];
-    const fileExtension = file.name.split(".").pop().toLowerCase();
-
-    if (!validExtensions.includes(fileExtension)) {
-      // Reset the input value to clear the invalid file
-      event.target.value = "";
-      return;
-    }
-
-    setEditTestimonialData((prevImage) => ({
+    setAddTestimonialData((prevImage) => ({
       ...prevImage,
       [event.target.name]: file,
     }));
-
-    setSelectedImage(file);
   };
-  // file handle end
 
-  // rating code start
-  const starArray = Array.from({ length: 5 }, (_, index) => index + 1);
-
-  const handleStarClick = (selectedRating) => {
-    setEditTestimonialData((prevData) => ({
-      ...prevData,
-      testimonial_rating: selectedRating,
-    }));
-  };
-  // rating code end
-
-  // edit data into testimonial database table
-  const editData = async (e) => {
+  // add data into testimonial database table
+  const addData = async (e) => {
     e.preventDefault();
     window.scrollTo({ behavior: "smooth", top: 0 });
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append(
         "testimonial_title",
-        editTestimonialData.testimonial_title
+        addTestimonialData.testimonial_title
       );
       formData.append("testimonial_desc", editorRef.current.getContent());
       formData.append(
         "testimonial_image",
-        editTestimonialData.testimonial_image
+        addTestimonialData.testimonial_image
       );
       formData.append(
         "testimonial_video",
-        editTestimonialData.testimonial_video
+        addTestimonialData.testimonial_video
       );
       formData.append(
         "testimonial_rating",
-        editTestimonialData.testimonial_rating
+        addTestimonialData.testimonial_rating
       );
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/testimonial/${testimonialId}`,
+
+      console.log(formData);
+
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/testimonial/router`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
           },
         }
       );
+
       setLoading(false);
       router.push("/admin/testimonial");
     } catch (error) {
@@ -148,22 +85,21 @@ const EditTestimonial = () => {
       <section className="home-section">
         <Header />
         <div className="admin_page_top">
-          <p className="admin_page_header">Edit Testimonial</p>
+          <p className="admin_page_header">Add Testimonial</p>
           <p>
             <Link href="/admin/admindashboard">
               <i className="fa-solid fa-house"></i>
             </Link>
             <i className="fa-solid fa-angles-right"></i>
-            <span>Edit Testimonial</span>
+            <span>Add Testimonial</span>
           </p>
         </div>
 
         <div className="add_data_form">
-          <form method="post" onSubmit={editData}>
-            {/* Title */}
+          <form method="post" onSubmit={addData}>
             <div className="mb-3">
               <label htmlFor="product_title" className="modal_label">
-                Testimonial Title:-
+                <span style={{ color: "red" }}>*</span> Testimonial Title:-
               </label>
               <input
                 type="text"
@@ -171,19 +107,16 @@ const EditTestimonial = () => {
                 name="testimonial_title"
                 className="modal_input"
                 placeholder="Enter Testimonial Title"
-                value={editTestimonialData?.testimonial_title}
                 onChange={handleChangeTestimonial}
                 required
               />
             </div>
-
-            {/* Description */}
             <div className="mb-3">
+              <span style={{ color: "red" }}>*</span>{" "}
               <p className="modal_label">Testimonial Description:-</p>
               <Editor
-                apiKey="d6ora8dyhvnc8zu7h9yflnh9ph9ojwx2p7titaqjpd66jf37"
+                apiKey="1ufup43ij0id27vrhewjb9ez5hf6ico9fpkd8qwsxje7r5bo"
                 onInit={(evt, editor) => (editorRef.current = editor)}
-                initialValue={editTestimonialData?.testimonial_desc}
                 init={{
                   height: 500,
                   menubar: true,
@@ -217,31 +150,13 @@ const EditTestimonial = () => {
                 required
               />
             </div>
-
-            {/* Image */}
             <div className="mb-3">
               <label htmlFor="testimonial_image" className="modal_label">
                 Testimonial Image:-{" "}
                 <span style={{ color: "red" }}>
-                  ( *Only jpg, png and jpeg file supported)
+                  (* Only jpg and png file supported)
                 </span>
               </label>
-              {/* Display the selected image immediately */}
-              {selectedImage ? (
-                <img
-                  src={URL.createObjectURL(selectedImage)}
-                  width="100px"
-                  height="100px"
-                  alt="profile"
-                />
-              ) : (
-                <img
-                  src={`/assets/upload/testimonial/${editTestimonialData?.testimonial_image}`}
-                  width="100px"
-                  height="100px"
-                  alt="profile"
-                />
-              )}
               <input
                 type="file"
                 id="testimonial_image"
@@ -250,7 +165,6 @@ const EditTestimonial = () => {
                 onChange={handleFileChange}
               />
             </div>
-            {/* Video */}
             <div className="mb-3">
               <label htmlFor="testimonial_video" className="modal_label">
                 Testimonial Video:-
@@ -260,13 +174,10 @@ const EditTestimonial = () => {
                 id="testimonial_video"
                 name="testimonial_video"
                 className="modal_input"
-                placeholder="Enter Testimonial Title"
-                value={editTestimonialData?.testimonial_video}
+                placeholder="Enter Testimonial Video Link"
                 onChange={handleChangeTestimonial}
               />
             </div>
-
-            {/* Rating */}
             <div className="mb-3">
               <label htmlFor="testimonial_rating" className="modal_label">
                 Testimonial Rating:-
@@ -279,7 +190,7 @@ const EditTestimonial = () => {
                       cursor: "pointer",
                       fontSize: "24px",
                       color:
-                        star <= editTestimonialData.testimonial_rating
+                        star <= addTestimonialData.testimonial_rating
                           ? "#f8d64e"
                           : "#ddd",
                       marginRight: "5px",
@@ -289,11 +200,9 @@ const EditTestimonial = () => {
                     &#9733;
                   </span>
                 ))}
-                <p>{editTestimonialData.testimonial_rating} stars</p>
+                <p>{addTestimonialData.testimonial_rating} stars</p>
               </div>
             </div>
-
-            {/* Handle Button Save and Cancle */}
             <div className="mb-3">
               <button type="submit" className="success_btn">
                 SAVE
@@ -311,4 +220,4 @@ const EditTestimonial = () => {
   );
 };
 
-export default EditTestimonial;
+export default AddGallery;

@@ -22,6 +22,10 @@ export const SuccessToast = (message) => {
   showToast(message, "success");
 };
 
+export const WarningToast = (message) => {
+  showToast(message, "warning");
+};
+
 const Toast = () => {
   return (
     <ToastContainer

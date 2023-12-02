@@ -723,3 +723,102 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.remove_multi_img_btn {
+  background-color: #bd1c1c;
+  color: white;
+  border-radius: 4px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+/* Gallery section */
+
+/* DropDown Style for Gallery */
+.dropdown-container {
+  display: flex;
+  flex-direction: column;
+  width: 23%;
+  float: right;
+  margin: 20px 20px 0 0;
+}
+
+label {
+  margin-bottom: 5px;
+}
+
+select {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+select:hover,
+select:focus {
+  border-color: #007bff; /* Change this color to your desired hover/focus color */
+}
+
+/* Optional: Style the dropdown arrow */
+select::-ms-expand {
+  display: none;
+}
+
+select::after {
+  content: "\25BC"; /* Unicode character for down arrow */
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Showing images for gallery */
+
+.gallery-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rem;
+  margin: 8rem 5rem 3rem 5rem;
+  position: relative;
+}
+
+.gallery-card {
+  position: relative;
+  border: 1px solid #ccc;
+  padding: 2px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-buttons {
+  position: absolute;
+  bottom: 0;
+  right: inherit;
+  left: 2.5rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.edit-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7109375rem;
+  border-radius: 0.1538rem;
+  color: #fff;
+  background-color: #1e91cf;
+  border-color: #166895;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.delete-button {
+  background-color: #f3a638;
+  border-color: #db870d;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7109375rem;
+  border-radius: 0.1538rem;
+  cursor: pointer;
+  margin: 5px;
+}

@@ -13,8 +13,6 @@ export default async function handler(req, res) {
   if (req.method == "POST") {
     const form = new IncomingForm();
     form.parse(req, async (err, fields, files) => {
-      console.log("**************REACHED***************");
-
       for (let index = 0; index < files.gallery_images.length; index++) {
         const image = files.gallery_images[index];
         const imageDetails = {
@@ -63,5 +61,19 @@ export default async function handler(req, res) {
         });
       }
     });
+  }
+
+  if (req.method == "GET") {
+    try {
+      // Query the database
+      const getGalleryData = "SELECT * FROM `gallery`";
+
+      const [rows] = await conn.query(getGalleryData);
+
+      // Process the data and send the response
+      res.status(200).json(rows);
+    } catch (err) {
+      res.status(401).json({ message: "Connection Error" });
+    }
   }
 }

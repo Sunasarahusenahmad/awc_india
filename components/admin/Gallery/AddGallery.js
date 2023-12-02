@@ -2,10 +2,12 @@ import Header from "@/layouts/Header";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Editor } from "@tinymce/tinymce-react";
-import Toast, { ErrorToast } from "@/layouts/toast/Toast";
+import Toast, { ErrorToast, WarningToast } from "@/layouts/toast/Toast";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 const AddGallery = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   // Change to use addMultiImages for managing multiple images
@@ -58,16 +60,26 @@ const AddGallery = () => {
   // Add multiple images and multiple categories handler
   const handleAddMultipleImagesChange = (event) => {
     const files = event.target.files;
-    const newImages = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const newImage = {
-        file: files[i],
-        category: "", // Initialize category as an empty string
-      };
+    // Filter out non-image files
+    const imageFiles = Array.from(files).filter((file) =>
+      file.type.startsWith("image/")
+    );
 
-      newImages.push(newImage);
+    // Check if any non-image files were selected
+    const nonImageFiles = Array.from(files).filter(
+      (file) => !file.type.startsWith("image/")
+    );
+
+    if (nonImageFiles.length > 0) {
+      WarningToast("Only image files are taken from given files.");
     }
+
+    const newImages = imageFiles.map((file) => ({
+      file,
+      category: "", // Initialize category as an empty string
+      sort: "", // Initialize sort as an empty string
+    }));
 
     // Change to use addMultiImages.gallery_images
     setAddMultiImages((prevImages) => ({
@@ -76,15 +88,15 @@ const AddGallery = () => {
     }));
 
     const newPreviews = [];
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < imageFiles.length; i++) {
       const reader = new FileReader();
       reader.onload = (e) => {
         newPreviews.push(e.target.result);
-        if (newPreviews.length === files.length) {
+        if (newPreviews.length === imageFiles.length) {
           setImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
         }
       };
-      reader.readAsDataURL(files[i]);
+      reader.readAsDataURL(imageFiles[i]);
     }
   };
 
@@ -112,9 +124,19 @@ const AddGallery = () => {
     });
   };
 
-  const handleChangeGallery = (e, index) => {
+  const handleChangeTitle = (e, index) => {
     const newGalleryData = [...addMultiImages.gallery_images];
     newGalleryData[index].category = e.target.value;
+
+    // Change to use setAddMultiImages
+    setAddMultiImages((prevImages) => ({
+      ...prevImages,
+      gallery_images: newGalleryData,
+    }));
+  };
+
+  const handleChangeSorting = (e, index) => {
+    const newGalleryData = [...addMultiImages.gallery_images];
     newGalleryData[index].sort = e.target.value;
 
     // Change to use setAddMultiImages
@@ -214,7 +236,7 @@ const AddGallery = () => {
                 name="gallery_title"
                 className="modal_input"
                 placeholder="Enter Gallery Title"
-                onChange={handleChangeGallery}
+                onChange={handleChangeTitle}
                 required
               />
             </div> */}
@@ -312,7 +334,7 @@ const AddGallery = () => {
                       name={`gallery_title_${index}`}
                       className="modal_input"
                       placeholder={`Enter Gallery Title ${index + 1}`}
-                      onChange={(e) => handleChangeGallery(e, index)}
+                      onChange={(e) => handleChangeTitle(e, index)}
                       required
                     />
                   </div>
@@ -353,7 +375,7 @@ const AddGallery = () => {
                       name={`gallery_title_${index}`}
                       className="modal_input"
                       placeholder={`Enter Gallery Title ${index + 1}`}
-                      onChange={(e) => handleChangeGallery(e, index)}
+                      onChange={(e) => handleChangeTitle(e, index)}
                     />
                   </div>
                   <div className="mb-3">
@@ -414,14 +436,14 @@ const AddGallery = () => {
             </div> */}
 
             {/* Display images in a table */}
-            <table className="image-table">
+            <table className="admin_category_table">
               <thead>
                 <tr>
-                  <th>Image</th>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Sort</th>
-                  <th>Delete</th>
+                  <th style={{ width: "10%" }}>IMAGE</th>
+                  <th style={{ width: "25%" }}>TITLE</th>
+                  <th style={{ width: "40%" }}>CATEGORY</th>
+                  <th style={{ width: "25%" }}>SORTING</th>
+                  <th style={{ width: "5%" }}>OPERATION</th>
                 </tr>
               </thead>
               <tbody>
@@ -441,7 +463,7 @@ const AddGallery = () => {
                         name={`gallery_title_${index}`}
                         className="modal_input"
                         placeholder={`Enter Gallery Title ${index + 1}`}
-                        onChange={(e) => handleChangeGallery(e, index)}
+                        onChange={(e) => handleChangeTitle(e, index)}
                       />
                     </td>
                     <td>
@@ -498,15 +520,16 @@ const AddGallery = () => {
                         name={`gallery_sort_${index}`}
                         className="modal_input"
                         placeholder={`Gallery Sorting ${index + 1}`}
-                        onChange={(e) => handleChangeGallery(e, index)}
+                        onChange={(e) => handleChangeSorting(e, index)}
                       />
                     </td>
-                    <td>
+                    <td style={{ textAlign: "center" }}>
                       <button
                         type="button"
+                        className="remove_multi_img_btn"
                         onClick={() => handleRemoveImage(index)}
                       >
-                        Delete
+                        <i className="fa-solid fa-xmark"></i>
                       </button>
                     </td>
                   </tr>

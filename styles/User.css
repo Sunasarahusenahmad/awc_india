@@ -569,25 +569,11 @@ form .modal_input:focus {
 
 /* delete modal */
 .operation_btn {
-  background-color: transparent;
-  border: 2px solid green;
   padding: 6px 8px;
   cursor: pointer;
-  color: green;
   margin-right: 8px;
 }
-.operation_btn:hover {
-  background-color: green;
-  color: var(--fourth-color);
-}
-.operation_delete_btn {
-  color: #df1d23;
-  border: 2px solid #df1d23;
-}
-.operation_delete_btn:hover {
-  color: var(--fourth-color);
-  background-color: #df1d23;
-}
+
 .opr_active_btn {
   width: 50px;
   height: 25px;

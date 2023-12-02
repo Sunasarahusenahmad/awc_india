@@ -23,8 +23,14 @@ const Gallery = () => {
             </p>
           </div>
           <div className="content_add_btn_section">
-            <Link href="/admin/gallery/add-gallery">
+            <Link href="/admin/gallery/gallery-category">
               <button type="button">
+                <i className="fa-solid fa-plus"></i>Add Category
+              </button>
+            </Link>
+
+            <Link href="/admin/gallery/add-gallery">
+              <button type="button" style={{ marginLeft: "20px" }}>
                 <i className="fa-solid fa-plus"></i>Add Images
               </button>
             </Link>

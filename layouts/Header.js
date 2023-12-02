@@ -9,9 +9,9 @@ const Header = ({ onFilterChange }) => {
   const [searchText, setSearchText] = useState("");
 
   const handleSearchChange = (e) => {
-    setSearchText(e.target.value);
-    onFilterChange(e.target.value); // Notify parent component about filter change
-    console.log(searchText);
+    const searchText = e.target.value.toLowerCase();
+    setSearchText(searchText);
+    onFilterChange(searchText); // Notify parent component about filter change
   };
 
   const [isLogOutModalOpen, setIsLogOutModalOpen] = useState(false);

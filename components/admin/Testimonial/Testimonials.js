@@ -19,8 +19,8 @@ const Testimonials = () => {
   useEffect(() => {
     setFilterdTestimonial(
       getAllTestimonial.filter((e) => {
-        let data = e.testimonial_title;
-        return data.includes(filterValue);
+        let data = e.testimonial_title.toLowerCase(); // Convert to lowercase
+        return data.includes(filterValue.toLowerCase()); // Case-insensitive search
       })
     );
   }, [filterValue]);
@@ -141,7 +141,7 @@ const Testimonials = () => {
     <>
       {loading && <Loading />}
       <section className="home-section">
-        <Header />
+        <Header onFilterChange={handleFilterChange} />
         <div className="admin_page_top">
           <div className="page_top_left_section">
             <p className="admin_page_header">Testimonial</p>

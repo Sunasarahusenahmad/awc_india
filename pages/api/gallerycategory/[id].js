@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     }
   }
 
-  if (req.method == "DELETE") {
+  if (req.method === "DELETE") {
     try {
       const { id } = req.query;
 
@@ -30,16 +30,32 @@ export default async function handler(req, res) {
 
       const [rows] = await conn.query(deleteGalleryCategory, [id]);
 
+      // Check if any rows were affected
+      if (rows.affectedRows === 0) {
+        // No rows were affected, which means the record did not exist
+        return res.status(404).json({
+          message: "Gallery Category not found.",
+        });
+      }
+
       // Process the data and send the response
-      res.status(200).json(rows);
+      res
+        .status(200)
+        .json({ message: "Gallery Category deleted successfully." });
     } catch (error) {
-      console.log(error);
+      if (error?.errno === 1451 || error?.code === "ER_ROW_IS_REFERENCED_2") {
+        // Foreign key constraint violation
+        return res.status(400).json({
+          message: "This category already exist in another table. ",
+        });
+      }
+
       res.status(500).json({
         message: "Cannot Delete Gallery Category... Check Connection",
+        error: error.message,
       });
     }
   }
-
   if (req.method == "PATCH") {
     try {
       const updateGalleryCategory =

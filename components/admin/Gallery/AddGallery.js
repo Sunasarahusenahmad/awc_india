@@ -1,5 +1,5 @@
 import Header from "@/layouts/Header";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Editor } from "@tinymce/tinymce-react";
 import Toast, { ErrorToast, WarningToast } from "@/layouts/toast/Toast";
@@ -14,11 +14,11 @@ const AddGallery = () => {
   const [addMultiImages, setAddMultiImages] = useState({
     gallery_images: [],
   });
-
-  console.log(addMultiImages);
-
   const [imagePreviews, setImagePreviews] = useState([]);
   const [imageCategories, setImageCategories] = useState([]);
+
+  // drag-drop state
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // handled the gallery category values start
   const handleCategoryChange = (e, index) => {
@@ -209,93 +209,56 @@ const AddGallery = () => {
   }, []);
   //get or fetch all gallery category data end
 
+  // Function to handle the drag enter event
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  // Function to handle the drag leave event
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  // Function to handle the drop event
+  const handleDrop = (e) => {
+    e.preventDefault();
+
+    const files = e.dataTransfer.files;
+
+    // Add the dropped files to the state
+    handleAddMultipleImagesChange({ target: { files } });
+
+    setIsDragOver(false);
+  };
+
   return (
     <>
       <section className="home-section">
-        <Header />
+        <Header onFilterChange={() => {}} />
         <div className="admin_page_top">
-          <p className="admin_page_header">Add Image</p>
+          <p className="admin_page_header">Add Images</p>
           <p>
             <Link href="/admin/admindashboard">
               <i className="fa-solid fa-house"></i>
             </Link>
             <i className="fa-solid fa-angles-right"></i>
-            <span>Add Image</span>
+            <span>Add Images</span>
           </p>
         </div>
 
         <div className="add_data_form">
           <form method="post" onSubmit={addData}>
-            {/* <div className="mb-3">
-              <label htmlFor="product_title" className="modal_label">
-                <span style={{ color: "red" }}>*</span> Gallery Title:-
-              </label>
-              <input
-                type="text"
-                id="gallery_title"
-                name="gallery_title"
-                className="modal_input"
-                placeholder="Enter Gallery Title"
-                onChange={handleChangeTitle}
-                required
-              />
-            </div> */}
-
-            {/* <div className="mb-3">
-              <label htmlFor="cate_id" className="modal_label">
-                Choose Category:
-              </label>
-              <input
-                list="categories"
-                name="cate_id"
-                id="cate_id"
-                className="modal_input"
-                onChange={(e) => handleCategoryChange(e)}
-                multiple
-              />
-              <datalist id="categories">
-                {getAllGalleryCategory.map((category) => (
-                  <option key={category.id} value={category.category_title} />
-                ))}
-              </datalist>
-
-              <ul
-                style={{
-                  paddingTop: "20px",
-                  border: "1px solid #ddd",
-                  borderRadius: "5px",
-                  listStyleType: "none",
-                  padding: "10px",
-                }}
-              >
-                {selectedCategories.map((category) => (
-                  <li key={category.id}>
-                    {category.category_title}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCategory(category.id)}
-                    >
-                      <i
-                        class="fa-solid fa-circle-minus"
-                        style={{
-                          color: "red",
-                          paddingLeft: "20px",
-                          fontSize: "20px",
-                        }}
-                      ></i>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div> */}
-
-            <div className="mb-3">
-              <label htmlFor="gallery_image" className="modal_label">
-                Choose Images:{" "}
-                <span style={{ color: "red" }}>
-                  (* Only jpg, png, and jpeg files supported)
-                </span>
-              </label>
+            <div
+              className={`drag-drop-area ${isDragOver ? "drag-over" : ""}`}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()} // Prevent default to allow drop
+            >
+              <p>Drag & Drop Images Here</p>
+              <span>or</span>
               <input
                 type="file"
                 id="gallery_image"
@@ -304,139 +267,14 @@ const AddGallery = () => {
                 onChange={handleAddMultipleImagesChange}
                 multiple
               />
+              <p>(Only jpg, png, and jpeg files supported)</p>
             </div>
 
-            {/* Display image previews with input boxes */}
-            {/* <div
-              className="image-previews"
-              style={{ display: "flex", flexWrap: "wrap" }}
-            >
-              {imagePreviews.map((preview, index) => (
-                <div
-                  key={index}
-                  style={{ marginRight: "10px", marginBottom: "10px" }}
-                >
-                  <img
-                    src={preview}
-                    alt={`Preview ${index}`}
-                    style={{ width: "200px", height: "150px" }}
-                  />
-                  <div className="mt-3">
-                    <label
-                      htmlFor={`gallery_title_${index}`}
-                      className="modal_label"
-                    >
-                      <span style={{ color: "red" }}>*</span> Gallery Title:-
-                    </label>
-                    <input
-                      type="text"
-                      id={`gallery_title_${index}`}
-                      name={`gallery_title_${index}`}
-                      className="modal_input"
-                      placeholder={`Enter Gallery Title ${index + 1}`}
-                      onChange={(e) => handleChangeTitle(e, index)}
-                      required
-                    />
-                  </div>
-                </div>
-              ))}
-            </div> */}
-
-            {/* <div
-              className="image-previews"
-              style={{ display: "flex", flexWrap: "wrap" }}
-            >
-              {imagePreviews.map((preview, index) => (
-                <div
-                  key={index}
-                  style={{ marginRight: "10px", marginBottom: "10px" }}
-                >
-                  <img
-                    src={preview}
-                    alt={`Preview ${index}`}
-                    style={{ width: "200px", height: "150px" }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(index)}
-                  >
-                    delete
-                  </button>
-                  <div className="mt-3">
-                    <label
-                      htmlFor={`gallery_title_${index}`}
-                      className="modal_label"
-                    >
-                      <span style={{ color: "red" }}>*</span> Gallery Title:-
-                    </label>
-                    <input
-                      type="text"
-                      id={`gallery_title_${index}`}
-                      name={`gallery_title_${index}`}
-                      className="modal_input"
-                      placeholder={`Enter Gallery Title ${index + 1}`}
-                      onChange={(e) => handleChangeTitle(e, index)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label
-                      htmlFor={`gallery_category_${index}`}
-                      className="modal_label"
-                    >
-                      Choose Category:
-                    </label>
-                    <input
-                      list={`categories_${index}`}
-                      name={`cate_id_${index}`}
-                      id={`cate_id_${index}`}
-                      className="modal_input"
-                      onChange={(e) => handleCategoryChange(e, index)}
-                    />
-                    <datalist id={`categories_${index}`}>
-                      {getAllGalleryCategory.map((category) => (
-                        <option
-                          key={category.id}
-                          value={category.category_title}
-                        />
-                      ))}
-                    </datalist>
-                    <ul
-                      style={{
-                        paddingTop: "20px",
-                        border: "1px solid #ddd",
-                        borderRadius: "5px",
-                        listStyleType: "none",
-                        padding: "10px",
-                      }}
-                    >
-                      {(imageCategories[index] || []).map((category) => (
-                        <li key={category.id}>
-                          {category.category_title}
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleRemoveCategory(index, category.id)
-                            }
-                          >
-                            <i
-                              className="fa-solid fa-circle-minus"
-                              style={{
-                                color: "red",
-                                paddingLeft: "20px",
-                                fontSize: "20px",
-                              }}
-                            ></i>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div> */}
-
             {/* Display images in a table */}
-            <table className="admin_category_table">
+            <table
+              className="admin_category_table"
+              style={{ marginTop: "1rem" }}
+            >
               <thead>
                 <tr>
                   <th style={{ width: "10%" }}>IMAGE</th>
@@ -472,6 +310,7 @@ const AddGallery = () => {
                         name={`cate_id_${index}`}
                         id={`cate_id_${index}`}
                         className="modal_input"
+                        placeholder="Choose Category"
                         onChange={(e) => handleCategoryChange(e, index)}
                       />
                       <datalist id={`categories_${index}`}>
@@ -483,10 +322,8 @@ const AddGallery = () => {
                         ))}
                       </datalist>
                       <ul
+                        className="selected-categories"
                         style={{
-                          paddingTop: "20px",
-                          border: "1px solid #ddd",
-                          borderRadius: "5px",
                           listStyleType: "none",
                           padding: "10px",
                         }}
@@ -541,7 +378,7 @@ const AddGallery = () => {
               <button type="submit" className="success_btn">
                 SAVE
               </button>
-              <Link href="/admin/testimonial">
+              <Link href="/admin/gallery">
                 <button type="button" className="success_btn cancel_btn">
                   CANCEL
                 </button>
@@ -551,6 +388,32 @@ const AddGallery = () => {
         </div>
         <Toast />
       </section>
+
+      <style jsx global>{`
+        .drag-drop-area {
+          border: 2px dashed #ccc;
+          border-radius: 5px;
+          padding: 20px;
+          text-align: center;
+          cursor: pointer;
+        }
+
+        .drag-drop-area.drag-over {
+          border-color: #4caf50;
+        }
+
+        .selected-categories li {
+          display: flex;
+          align-items: center;
+          margin-bottom: 5px;
+        }
+
+        .selected-categories button {
+          background: none;
+          border: none;
+          cursor: pointer;
+        }
+      `}</style>
     </>
   );
 };

@@ -52,17 +52,19 @@ export default async function handler(req, res) {
               testimonial_image,
               testimonial_video,
               testimonial_rating,
+              product_id,
             } = fields;
 
             // SQL query for inserting data into the testimonial table
             const insertQuery =
-              "INSERT INTO `testimonial`(`testimonial_title`, `testimonial_desc`, `testimonial_image`, `testimonial_video`, `rating`) VALUES (?, ?, ?, ?, ?)";
+              "INSERT INTO `testimonial`(`testimonial_title`, `testimonial_desc`, `testimonial_image`, `testimonial_video`, `rating`, `product_id`) VALUES (?, ?, ?, ?, ?, ?)";
             const values = [
               testimonial_title,
               testimonial_desc,
               newFileNameImage,
               testimonial_video,
               testimonial_rating,
+              product_id,
             ];
 
             // Execute the query
@@ -82,7 +84,7 @@ export default async function handler(req, res) {
   if (req.method == "GET") {
     try {
       // Query the database to fetch all testimonials
-      const fetchQuery = "SELECT * FROM `testimonial`";
+      const fetchQuery = "SELECT * FROM `testimonial` ORDER BY id DESC";
 
       // Execute the query
       const [rows] = await conn.query(fetchQuery);

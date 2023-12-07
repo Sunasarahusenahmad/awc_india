@@ -17,6 +17,7 @@ const EditTestimonial = () => {
     testimonial_image: null,
     testimonial_video: "",
     testimonial_rating: 0,
+    product_id: "",
   });
 
   // get per testimonial data start
@@ -32,6 +33,7 @@ const EditTestimonial = () => {
       setEditTestimonialData({
         ...fetchedData,
         testimonial_rating: parseInt(fetchedData.rating), // it's a number
+        product_id: parseInt(fetchedData.product_id), // it's a number
       });
       setLoading(false);
     } catch (err) {
@@ -126,6 +128,7 @@ const EditTestimonial = () => {
         "testimonial_rating",
         editTestimonialData.testimonial_rating
       );
+      formData.append("product_id", editTestimonialData.product_id);
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}/testimonial/${testimonialId}`,
         formData,
@@ -142,6 +145,28 @@ const EditTestimonial = () => {
       setLoading(false);
     }
   };
+
+  //get or fetch all product data start
+  const [getProductData, setGetProductData] = useState([]);
+
+  const getAllProductData = async () => {
+    await axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/products/router`)
+      .then((res) => {
+        setGetProductData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        ErrorToast(err?.response?.data?.message);
+        setLoading(false);
+      });
+  };
+
+  // fetch all product data
+  useEffect(() => {
+    getAllProductData();
+  }, []);
+  //get or fetch all product data end
 
   return (
     <>
@@ -160,6 +185,28 @@ const EditTestimonial = () => {
 
         <div className="add_data_form">
           <form method="post" onSubmit={editData}>
+            {/* Product Category */}
+            <div className="mb-3">
+              <label htmlFor="product_id" className="modal_label">
+                <span style={{ color: "red" }}>*</span> Select Product:-
+              </label>
+              <select
+                id="product_id"
+                name="product_id"
+                className="modal_input"
+                value={editTestimonialData?.product_id}
+                onChange={handleChangeTestimonial}
+                required
+              >
+                <option value="">-- Select Product --</option>
+                {getProductData.map((product) => (
+                  <option key={product.product_id} value={product.product_id}>
+                    {product.product_title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Title */}
             <div className="mb-3">
               <label htmlFor="product_title" className="modal_label">

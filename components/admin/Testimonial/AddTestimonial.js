@@ -16,8 +16,8 @@ const AddTestimonial = () => {
     testimonial_image: null,
     testimonial_video: "",
     testimonial_rating: 0,
+    product_id: "",
   });
-
   // handled the testimonial input values
   const handleChangeTestimonial = async (event) => {
     const { name, value } = event.target;
@@ -96,6 +96,7 @@ const AddTestimonial = () => {
         "testimonial_rating",
         addTestimonialData.testimonial_rating
       );
+      formData.append("product_id", addTestimonialData.product_id);
 
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/testimonial/router`,
@@ -115,6 +116,28 @@ const AddTestimonial = () => {
     }
   };
 
+  //get or fetch all product data start
+  const [getProductData, setGetProductData] = useState([]);
+
+  const getAllProductData = async () => {
+    await axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/products/router`)
+      .then((res) => {
+        setGetProductData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        ErrorToast(err?.response?.data?.message);
+        setLoading(false);
+      });
+  };
+
+  // fetch all product data
+  useEffect(() => {
+    getAllProductData();
+  }, []);
+  //get or fetch all product data end
+
   return (
     <>
       <section className="home-section">
@@ -132,6 +155,27 @@ const AddTestimonial = () => {
 
         <div className="add_data_form">
           <form method="post" onSubmit={addData}>
+            {/* Product Category */}
+            <div className="mb-3">
+              <label htmlFor="product_id" className="modal_label">
+                <span style={{ color: "red" }}>*</span> Select Product:-
+              </label>
+              <select
+                id="product_id"
+                name="product_id"
+                className="modal_input"
+                onChange={handleChangeTestimonial}
+                required
+              >
+                <option value="">-- Select Product --</option>
+                {getProductData.map((product) => (
+                  <option key={product.product_id} value={product.product_id}>
+                    {product.product_title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Title */}
             <div className="mb-3">
               <label htmlFor="product_title" className="modal_label">

@@ -45,12 +45,22 @@ const EditAllGallery = () => {
       setSelectedImages(Array(formDataArray.length).fill(null));
     }
 
-    // Update the form data for the specified index
-    setFormDataArray((prevData) => {
-      const newData = [...prevData];
-      newData[index][key] = value;
-      return newData;
-    });
+    // Check if the key is 'gallery_image' and the value is not changed
+    if (key === "gallery_image" && value === null) {
+      // Set the existing image value for that index
+      setFormDataArray((prevData) => {
+        const newData = [...prevData];
+        newData[index][key] = formDataArray[index][key];
+        return newData;
+      });
+    } else {
+      // Update the form data for the specified index
+      setFormDataArray((prevData) => {
+        const newData = [...prevData];
+        newData[index][key] = value;
+        return newData;
+      });
+    }
   };
 
   const handleFileChange = async (event, index) => {
@@ -61,6 +71,7 @@ const EditAllGallery = () => {
       newData[index] = {
         ...newData[index],
         gallery_image: file,
+        gallery_category_id: newData[index].gallery_category, // Update category ID
       };
       return newData;
     });
@@ -96,11 +107,22 @@ const EditAllGallery = () => {
       const updateRequests = formDataArray.map(async (item, index) => {
         const updatedFormData = new FormData();
         updatedFormData.append("gallery_title", item.gallery_title);
-        updatedFormData.append("gallery_category", item.gallery_category);
+        // Check if gallery_category is defined before appending it
+        if (item.gallery_category !== undefined) {
+          updatedFormData.append("gallery_category", item.gallery_category);
+        } else {
+          // If gallery_category is not selected, set it to a default category ID
+          const defaultCategoryId = categoryId; // Change this to your default category ID
+          updatedFormData.append("gallery_category", defaultCategoryId);
+        }
+
         updatedFormData.append("gallery_sort", item.gallery_sort);
-        // Append the new image if it's selected
-        const selectedImage = selectedImages[index];
-        if (selectedImage) {
+        // Append the existing image value if it's not changed
+        if (!selectedImages[index]) {
+          updatedFormData.append("gallery_image", item.gallery_image);
+        } else {
+          // Append the new image if it's selected
+          const selectedImage = selectedImages[index];
           updatedFormData.append("gallery_image", selectedImage);
         }
         // Perform the PATCH request to update the item

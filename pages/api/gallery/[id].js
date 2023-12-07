@@ -21,7 +21,6 @@ export default async function handler(req, res) {
 
       res.status(200).json(rows);
     } catch (error) {
-      console.log(error);
       res
         .status(500)
         .json({ message: "Can not Get gallery... check connection" });
@@ -178,7 +177,6 @@ export default async function handler(req, res) {
 
   // PATCH request to update all items in the category
   if (req.method === "PATCH" && req.query.action === "updateCategory") {
-    console.log("**********************REACHED*************************");
     try {
       const form = new IncomingForm();
       form.parse(req, async (err, fields, files) => {

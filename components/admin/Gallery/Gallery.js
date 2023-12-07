@@ -246,49 +246,77 @@ const Gallery = () => {
           </select>
         </div>
 
-        <div>
-          <button onClick={handleDeleteAllInCategory}>Delete All Images</button>
+        <div className="button-container">
+          <div>
+            <button
+              onClick={handleDeleteAllInCategory}
+              className="delete-button"
+              disabled={filteredGalleryData.length === 0} // Disable if no records found
+            >
+              <span>
+                <i className="fa-solid fa-trash-can"></i>
+              </span>{" "}
+              Delete All Records
+            </button>
+          </div>
+          <button
+            onClick={() => handleEditAllInCategory(selectedCategory)}
+            className="edit-button"
+            disabled={filteredGalleryData.length === 0} // Disable if no records found
+          >
+            <span>
+              <i className="fa-solid fa-pencil"></i>
+            </span>{" "}
+            Edit All Records
+          </button>
         </div>
-        <button onClick={() => handleEditAllInCategory(selectedCategory)}>
-          Edit All Images in Category
-        </button>
 
         <div className="gallery-container">
-          {filteredGalleryData.length > 0
-            ? filteredGalleryData.map((data) => (
-                <div
-                  key={data.id}
-                  className="gallery-card"
-                  onMouseEnter={() => setHoveredImage(data.id)}
-                  onMouseLeave={() => setHoveredImage(null)}
-                >
-                  <img
-                    src={`/assets/upload/gallery/${data.gallery_image}`}
-                    alt={data.gallery_title}
-                    style={{ width: "200px", height: "220px" }}
-                  />
-                  {hoveredImage === data.id && (
-                    <div className="image-title-overlay">
-                      <p>{data.gallery_title}</p>
-                    </div>
-                  )}
-                  <div className="card-buttons">
-                    <button
-                      onClick={() => handleEdit(data.id)}
-                      className="edit-button"
-                    >
-                      <i class="fa-solid fa-pencil"></i>
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal(data.id)}
-                      className="delete-button"
-                    >
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
+          {filteredGalleryData.length > 0 ? (
+            filteredGalleryData.map((data) => (
+              <div
+                key={data.id}
+                className="gallery-card"
+                onMouseEnter={() => setHoveredImage(data.id)}
+                onMouseLeave={() => setHoveredImage(null)}
+              >
+                <img
+                  src={`/assets/upload/gallery/${data.gallery_image}`}
+                  alt={data.gallery_title}
+                  style={{ width: "200px", height: "220px" }}
+                />
+                {hoveredImage === data.id && (
+                  <div className="image-title-overlay">
+                    <p>{data.gallery_title}</p>
                   </div>
+                )}
+                <div className="card-buttons">
+                  <button
+                    onClick={() => handleEdit(data.id)}
+                    className="edit-button"
+                  >
+                    <i class="fa-solid fa-pencil"></i>
+                  </button>
+                  <button
+                    onClick={() => openDeleteModal(data.id)}
+                    className="delete-button"
+                  >
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
                 </div>
-              ))
-            : "No Record Found"}
+              </div>
+            ))
+          ) : (
+            <div
+              style={{
+                textAlign: "center",
+                paddingLeft: "25rem",
+                height: "20vh",
+              }}
+            >
+              <img src="/assets/images/no-data.png" alt="No Data Found" />
+            </div>
+          )}
         </div>
         {/* delete modal component */}
         <DeleteModal
@@ -312,3 +340,30 @@ const Gallery = () => {
 };
 
 export default Gallery;
+
+<style jsx>{`
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .button-container .delete-button:disabled {
+    cursor: not-allowed;
+    background-color: #e88a8a; /* Red color for the delete button */
+  }
+
+  .button-container .edit-button:disabled {
+    cursor: not-allowed;
+    background-color: #a8d8ea; /* Blue color for the edit button */
+  }
+
+  .button-container button {
+    padding: 10px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+`}</style>;

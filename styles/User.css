@@ -928,3 +928,29 @@ select::after {
 .gallery-card:hover .image-title-overlay {
   opacity: 1;
 }
+
+/* edit and delete all button */
+
+.button-container {
+  margin: 46px 0 0 40rem;
+  display: flex;
+  width: 25%;
+}
+
+.button-container .delete-button:disabled {
+  cursor: not-allowed;
+  background-color: #e88a8a; /* Red color for the delete button */
+}
+
+.button-container .edit-button:disabled {
+  cursor: not-allowed;
+  background-color: #9fd9ee; /* Blue color for the edit button */
+}
+
+.delete-button {
+  margin-right: 1rem;
+}
+
+.fa-solid {
+  font-size: 0.7109375rem;
+}

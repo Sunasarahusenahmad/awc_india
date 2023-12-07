@@ -43,6 +43,7 @@ export default async function handler(req, res) {
           testimonial_desc,
           testimonial_video,
           testimonial_rating,
+          product_id,
         } = fields;
 
         let sql = "";
@@ -59,13 +60,14 @@ export default async function handler(req, res) {
         if (!files.testimonial_image) {
           // Update without changing the image
           sql =
-            "UPDATE `testimonial` SET `testimonial_title`= ?, `testimonial_desc`= ?, `testimonial_video`= ?, `rating`= ? WHERE id = ?";
+            "UPDATE `testimonial` SET `testimonial_title`= ?, `testimonial_desc`= ?, `testimonial_video`= ?, `rating`= ?, `product_id`= ? WHERE id = ?";
 
           params = [
             testimonial_title,
             testimonial_desc,
             testimonial_video,
             testimonial_rating,
+            product_id,
             id,
           ];
           result = await conn.query(sql, params);
@@ -92,7 +94,7 @@ export default async function handler(req, res) {
 
           // Update with changing the image
           sql =
-            "UPDATE `testimonial` SET `testimonial_title`= ?, `testimonial_desc`= ?, `testimonial_image`= ?, `testimonial_video`= ?, `rating`= ? WHERE id = ?";
+            "UPDATE `testimonial` SET `testimonial_title`= ?, `testimonial_desc`= ?, `testimonial_image`= ?, `testimonial_video`= ?, `rating`= ?, `product_id`= ? WHERE id = ?";
 
           params = [
             testimonial_title,
@@ -100,6 +102,7 @@ export default async function handler(req, res) {
             newFileName,
             testimonial_video,
             testimonial_rating,
+            product_id,
             id,
           ];
           result = await conn.query(sql, params);

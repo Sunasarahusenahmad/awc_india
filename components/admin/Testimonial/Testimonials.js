@@ -137,6 +137,28 @@ const Testimonials = () => {
   };
   // handle youtube video end
 
+  //get or fetch all product data start
+  const [getProductData, setGetProductData] = useState([]);
+
+  const getAllProductData = async () => {
+    await axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/products/router`)
+      .then((res) => {
+        setGetProductData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        ErrorToast(err?.response?.data?.message);
+        setLoading(false);
+      });
+  };
+
+  // fetch all product data
+  useEffect(() => {
+    getAllProductData();
+  }, []);
+  //get or fetch all product data end
+
   return (
     <>
       {loading && <Loading />}
@@ -166,6 +188,7 @@ const Testimonials = () => {
             <thead>
               <tr>
                 <th style={{ width: "5%", textAlign: "center" }}>ID</th>
+                <th style={{ width: "10%", textAlign: "center" }}>PRODUCT</th>
                 <th style={{ width: "15%", textAlign: "center" }}>TITLE</th>
                 <th style={{ width: "30%", textAlign: "center" }}>
                   DESCRIPTION
@@ -173,7 +196,7 @@ const Testimonials = () => {
                 <th style={{ width: "10%", textAlign: "center" }}>IMAGE</th>
                 <th style={{ width: "30%", textAlign: "center" }}>VIDEO</th>
                 <th style={{ width: "15%", textAlign: "center" }}>RATING</th>
-                <th style={{ width: "20%", textAlign: "center" }}>OPERATION</th>
+                <th style={{ width: "10%", textAlign: "center" }}>OPERATION</th>
                 <th style={{ width: "10%", textAlign: "center" }}>STATUS</th>
               </tr>
             </thead>
@@ -183,6 +206,18 @@ const Testimonials = () => {
                   <tr key={testimonial.id} style={{ textAlign: "center" }}>
                     {/* ID */}
                     <td>{index + 1}</td>
+
+                    {/* Title */}
+                    <td>
+                      {getProductData.map(
+                        (product) =>
+                          product.product_id === testimonial.product_id && (
+                            <span key={product.product_id}>
+                              {product.product_title}
+                            </span>
+                          )
+                      )}
+                    </td>
 
                     {/* Title */}
                     <td>{testimonial.testimonial_title}</td>
